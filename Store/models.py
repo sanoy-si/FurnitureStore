@@ -27,14 +27,16 @@ class Product(models.Model):
     last_update = models.DateTimeField(auto_now=True)
     collection = models.ForeignKey(
         Collection, on_delete=models.PROTECT, related_name='products')
-    # promotions = models.ManyToManyField(Promotion, blank=True)
-
+    cover_image = models.ImageField(upload_to='store/images')
     def __str__(self) -> str:
         return self.title
 
     class Meta:
         ordering = ['title']
 
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,related_name="images")
+    image = models.ImageField(upload_to='store/images')
 
 class Customer(models.Model):
 
