@@ -1,7 +1,7 @@
 from decimal import Decimal
 from django.db import transaction
 from rest_framework import serializers
-from .models import Cart, CartItem, Customer, Order, OrderItem, Product, Collection, ProductImage
+from .models import Cart, CartItem, CustomOrder, Customer, Order, OrderItem, Product, Collection, ProductImage
 
 
 class CollectionSerializer(serializers.ModelSerializer):
@@ -126,7 +126,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['id', 'customer', 'placed_at', 'payment_status', 'items']
+        fields = ['id', 'customer', 'placed_at', 'payment_status', 'items','type']
 
 
 class UpdateOrderSerializer(serializers.ModelSerializer):
@@ -134,6 +134,19 @@ class UpdateOrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['payment_status']
 
+class CustomOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomOrder
+        fields = ['product_name','description','left_side_image','right_side_image','front_image','rear_image','placed_at']
+
+    def create(self, validated_data):
+        return CustomOrder.objects.create(customer_id = self.context['customer_id'], **validated_data) 
+
+class GetCustomOrdreSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CustomOrder
+        fields = ['customer','product_name','description','left_side_image','right_side_image','front_image','rear_image','placed_at']
 
 class CreateOrderSerializer(serializers.Serializer):
     cart_id = serializers.UUIDField()

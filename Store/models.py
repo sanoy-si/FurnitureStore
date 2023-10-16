@@ -16,6 +16,7 @@ class Collection(models.Model):
 
 
 class Product(models.Model):
+    
     title = models.CharField(max_length=255)
     slug = models.SlugField()
     description = models.TextField(null=True, blank=True)
@@ -25,9 +26,10 @@ class Product(models.Model):
         validators=[MinValueValidator(1)])
     inventory = models.IntegerField(validators=[MinValueValidator(0)])
     last_update = models.DateTimeField(auto_now=True)
-    collection = models.ForeignKey(
-        Collection, on_delete=models.PROTECT, related_name='products')
+    collection = models.ForeignKey(Collection, on_delete=models.PROTECT, related_name='products')
     cover_image = models.ImageField(upload_to='store/images')
+
+
     def __str__(self) -> str:
         return self.title
 
@@ -71,9 +73,9 @@ class Order(models.Model):
     ]
 
     placed_at = models.DateTimeField(auto_now_add=True)
-    payment_status = models.CharField(
-        max_length=1, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING)
+    payment_status = models.CharField(max_length=1, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING)
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT,related_name="orders")
+
 
     class Meta:
         permissions = [
@@ -111,5 +113,16 @@ class CartItem(models.Model):
 
     class Meta:
         unique_together = [['cart', 'product']]
+
+class CustomOrder(models.Model):
+    customer = models.ForeignKey(Customer,on_delete=models.CASCADE)
+    product_name = models.CharField(max_length=255)
+    left_side_image = models.ImageField()
+    right_side_image = models.ImageField()
+    front_image = models.ImageField()
+    rear_image = models.ImageField()
+    placed_at = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(null=True, blank=True)
+
 
 

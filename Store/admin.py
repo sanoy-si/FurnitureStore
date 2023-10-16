@@ -1,7 +1,7 @@
 from django.contrib import admin, messages
 from django.db.models.aggregates import Count
 from django.db.models.query import QuerySet
-from django.utils.html import format_html, urlencode
+from django.utils.html import format_html
 from django.urls import reverse
 from . import models
 
@@ -97,7 +97,7 @@ class CollectionAdmin(admin.ModelAdmin):
 
 @admin.register(models.Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ['first_name', 'last_name']
+    list_display = ['first_name', 'last_name','user']
     list_per_page = 10
     list_select_related = ['user']
     ordering = ['user__first_name', 'user__last_name']

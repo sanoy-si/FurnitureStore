@@ -20,4 +20,4 @@ class UserAdmin(BaseUserAdmin):
 
 class CustomProductAdmin(ProductAdmin):
     inlines = [ProductImageInline]
-# Register your models here.
+
