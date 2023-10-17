@@ -1,7 +1,7 @@
 from decimal import Decimal
 from django.db import transaction
 from rest_framework import serializers
-from .models import Cart, CartItem, CustomOrder, Customer, Order, OrderItem, Product, Collection, ProductImage
+from .models import Cart, CartItem, CustomOrder, Customer, Order, OrderItem, Product, Collection, ProductImage, WishList, WishListItem
 
 
 class CollectionSerializer(serializers.ModelSerializer):
@@ -126,7 +126,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['id', 'customer', 'placed_at', 'payment_status', 'items','type']
+        fields = ['id', 'customer', 'placed_at', 'payment_status', 'items']
 
 
 class UpdateOrderSerializer(serializers.ModelSerializer):
@@ -183,3 +183,40 @@ class CreateOrderSerializer(serializers.Serializer):
             Cart.objects.filter(pk=cart_id).delete()
 
             return order
+
+
+class WishListSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(read_only = True)
+    class Meta:
+        model = WishList
+        fields = ['id','created_at']
+
+    def create(self, validated_data):
+        customer = Customer.objects.get(user_id = self.context['user_id'])
+        return WishList.objects.create(customer_id = customer.id, **self.validated_data)
+
+
+    
+class WishListItemSerializer(serializers.ModelSerializer):
+    product = SimpleProductSerializer()
+    class Meta:
+        model = WishListItem
+        fields = ['id','product']
+  
+
+class CreateWishListItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WishListItem
+        fields = ['id','product']
+
+    def create(self, validated_data):
+        wishlist = WishList.objects.get(id = self.context['wishlist_id'])
+        return WishListItem.objects.create(wishlist_id = wishlist.id, **self.validated_data)
+    
+    def validate_product(self,product):
+        product_id = product.id
+        if not Product.objects.filter(id = product_id).exists():
+            raise serializers.ValidationError("Product Doesn't Exist")
+        if WishListItem.objects.filter(wishlist_id = self.context['wishlist_id']).filter(product_id = product_id).exists():
+            raise serializers.ValidationError("Product already Exist in the wishlist")
+        return product

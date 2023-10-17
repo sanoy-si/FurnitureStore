@@ -11,8 +11,8 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework import status
 from .filters import ProductFilter
-from .models import Cart, CartItem, Collection, CustomOrder, Customer, Order, OrderItem, Product, ProductImage
-from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CollectionSerializer, CreateOrderSerializer, CustomerSerializer, CustomOrderSerializer, GetCustomOrdreSerializer, OrderSerializer, ProductImageSerializer, ProductSerializer, UpdateCartItemSerializer, UpdateOrderSerializer
+from .models import Cart, CartItem, Collection, CustomOrder, Customer, Order, OrderItem, Product, ProductImage, WishList, WishListItem
+from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CollectionSerializer, CreateOrderSerializer, CreateWishListItemSerializer, CustomerSerializer, CustomOrderSerializer, GetCustomOrdreSerializer, OrderSerializer, ProductImageSerializer, ProductSerializer, UpdateCartItemSerializer, UpdateOrderSerializer, WishListItemSerializer,WishListSerializer
 
 
 class ProductViewSet(ModelViewSet):
@@ -83,10 +83,7 @@ class CustomerViewSet(ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
     permission_classes = [IsAdminUser]
-    def get_permissions(self):
-        if self.request.method in ['GET']:
-            return [IsAdminUser()]
-        return [AllowAny()]
+
 
     @action(detail=True, permission_classes=[ViewCustomerHistoryPermission])
     def history(self, request, pk):
@@ -104,9 +101,33 @@ class CustomerViewSet(ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
+        
 
+class WishListViewSet(ListModelMixin,CreateModelMixin,RetrieveModelMixin,DestroyModelMixin,GenericViewSet):
+    serializer_class = WishListSerializer
+    permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        customer = Customer.objects.get(user_id = self.request.user.id)
+        return WishList.objects.filter(customer_id = customer.id)
 
+    def get_serializer_context(self):
+        return {'user_id':self.request.user.id}
+    
+
+class WishListItemViewSet(ModelViewSet):
+    serializer_class = WishListItemSerializer
+    queryset = WishListItem.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return CreateWishListItemSerializer
+        return WishListItemSerializer
+    def get_queryset(self):
+        return WishListItem.objects.filter(wishlist_id = self.kwargs['wishlist_pk'])
+
+    def get_serializer_context(self):
+        return {'wishlist_id':self.kwargs['wishlist_pk']}
 
 class CustomOrderViewSet(CreateModelMixin,ListModelMixin,GenericViewSet):
     serializer_class = CustomOrderSerializer
