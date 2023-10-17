@@ -139,8 +139,8 @@ class CustomOrderViewSet(CreateModelMixin,ListModelMixin,GenericViewSet):
         return CustomOrderSerializer
     
     def get_permissions(self):
-        if self.request.method == 'GET':
-            return [IsAdminUser()]
+        # if self.request.method == 'GET':
+        #     return [IsAdminUser()]
         return [IsAuthenticated()]
     
     def get_serializer_context(self):

@@ -165,6 +165,7 @@ class CreateOrderSerializer(serializers.Serializer):
 
             customer = Customer.objects.get(
                 user_id=self.context['user_id'])
+            
             order = Order.objects.create(customer=customer)
 
             cart_items = CartItem.objects \
