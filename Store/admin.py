@@ -33,6 +33,9 @@ class ProductImageInline(admin.TabularInline):
 @admin.register(models.CustomOrder)
 class CustomOrderAdmin(admin.ModelAdmin):
     list_display = ['order','ordered_by','placed_at']
+    readonly_fields = ['ordered_by','order','placed_at']
+
+
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
     autocomplete_fields = ['collection']

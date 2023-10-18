@@ -91,7 +91,7 @@ class CustomerViewSet(ModelViewSet):
 
     @action(detail=False, methods=['GET', 'PUT'], permission_classes=[IsAuthenticated])
     def me(self, request):
-        customer,created = Customer.objects.get_or_create(
+        customer,created = Customer.objects.get(
             user_id=request.user.id)
         if request.method == 'GET':
             serializer = CustomerSerializer(customer)
@@ -121,19 +121,15 @@ class WishListItemViewSet(ModelViewSet):
     def get_serializer_context(self):
         return {'wishlist_id':self.kwargs['wishlist_pk']}
 
-class CustomOrderViewSet(CreateModelMixin,ListModelMixin,GenericViewSet):
-    serializer_class = CustomOrderSerializer
+class CustomOrderViewSet(CreateModelMixin,GenericViewSet):
     queryset = CustomOrder.objects.all()
+    permission_classes = [IsAuthenticated]
     
     def get_serializer_class(self):
         if self.request.method=='GET':
             return GetCustomOrdreSerializer
         return CustomOrderSerializer
     
-    def get_permissions(self):
-        # if self.request.method == 'GET':
-        #     return [IsAdminUser()]
-        return [IsAuthenticated()]
     
     def get_serializer_context(self):
         customer = Customer.objects.get(user_id = self.request.user.id)

@@ -134,19 +134,6 @@ class UpdateOrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['payment_status']
 
-class CustomOrderSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomOrder
-        fields = ['product_name','description','left_side_image','right_side_image','front_image','rear_image','placed_at']
-
-    def create(self, validated_data):
-        return CustomOrder.objects.create(customer_id = self.context['customer_id'], **validated_data) 
-
-class GetCustomOrdreSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = CustomOrder
-        fields = ['customer','product_name','description','left_side_image','right_side_image','front_image','rear_image','placed_at']
 
 class CreateOrderSerializer(serializers.Serializer):
     cart_id = serializers.UUIDField()
@@ -184,6 +171,24 @@ class CreateOrderSerializer(serializers.Serializer):
             Cart.objects.filter(pk=cart_id).delete()
 
             return order
+
+
+
+class CustomOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomOrder
+        fields = ['product_name','description','left_side_image','right_side_image','front_image','rear_image']
+
+    def create(self, validated_data):
+        return CustomOrder.objects.create(customer_id = self.context['customer_id'], **validated_data) 
+
+class GetCustomOrdreSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CustomOrder
+        fields = ['customer','product_name','description','left_side_image','right_side_image','front_image','rear_image','placed_at']
+
+
 
 class WishListItemSerializer(serializers.ModelSerializer):
     product = SimpleProductSerializer()
