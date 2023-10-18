@@ -90,14 +90,6 @@ class OrderItem(models.Model):
     quantity = models.PositiveSmallIntegerField()
     unit_price = models.DecimalField(max_digits=6, decimal_places=2)
 
-
-class Address(models.Model):
-    street = models.CharField(max_length=255)
-    city = models.CharField(max_length=255)
-    customer = models.ForeignKey(
-        Customer, on_delete=models.CASCADE)
-
-
 class Cart(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -127,11 +119,14 @@ class CustomOrder(models.Model):
 
     def __str__(self):
         return self.product_name
+    def order(self):
+        return f"Custom Order {self.id}"
+    def ordered_by(self):
+        return self.customer.user.first_name + self.customer.user.last_name 
     
 
 class WishList(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
-
 
 
 class WishListItem(models.Model):
