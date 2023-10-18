@@ -185,25 +185,21 @@ class CreateOrderSerializer(serializers.Serializer):
 
             return order
 
-
-class WishListSerializer(serializers.ModelSerializer):
-    created_at = serializers.DateTimeField(read_only = True)
-    class Meta:
-        model = WishList
-        fields = ['id','created_at']
-
-    def create(self, validated_data):
-        customer = Customer.objects.get(user_id = self.context['user_id'])
-        return WishList.objects.create(customer_id = customer.id, **self.validated_data)
-
-
-    
 class WishListItemSerializer(serializers.ModelSerializer):
     product = SimpleProductSerializer()
     class Meta:
         model = WishListItem
-        fields = ['id','product']
-  
+        fields = ['id', 'product']
+
+
+class WishListSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
+    items = WishListItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = WishList
+        fields = ['id', 'items']
+    
 
 class CreateWishListItemSerializer(serializers.ModelSerializer):
     class Meta:

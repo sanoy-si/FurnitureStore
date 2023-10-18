@@ -21,8 +21,8 @@ carts_router.register('items', views.CartItemViewSet, basename='cart-items')
 customer_router = routers.NestedDefaultRouter(router,'customers',lookup = 'customer')
 customer_router.register('wishlists',views.WishListViewSet, basename='customer-wishlists')
 
-wish_list_router = routers.NestedDefaultRouter(router,'wishlists',lookup='wishlist')
-wish_list_router.register('items',views.WishListItemViewSet)
+wishlist_router = routers.NestedDefaultRouter(router,'wishlists',lookup='wishlist')
+wishlist_router.register('items',views.WishListItemViewSet,basename='wishlist-items')
 # URLConf
-urlpatterns = router.urls  + carts_router.urls + products_router.urls + customer_router.urls + wish_list_router.urls
+urlpatterns = router.urls  + carts_router.urls + products_router.urls + customer_router.urls + wishlist_router.urls
     

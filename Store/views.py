@@ -103,21 +103,13 @@ class CustomerViewSet(ModelViewSet):
             return Response(serializer.data)
         
 
-class WishListViewSet(ListModelMixin,CreateModelMixin,RetrieveModelMixin,DestroyModelMixin,GenericViewSet):
+class WishListViewSet(CreateModelMixin,RetrieveModelMixin,DestroyModelMixin,GenericViewSet):
+    queryset = WishList.objects.prefetch_related('items__product').all()
     serializer_class = WishListSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        customer = Customer.objects.get(user_id = self.request.user.id)
-        return WishList.objects.filter(customer_id = customer.id)
-
-    def get_serializer_context(self):
-        return {'user_id':self.request.user.id}
     
 
 class WishListItemViewSet(ModelViewSet):
-    serializer_class = WishListItemSerializer
-    queryset = WishListItem.objects.all()
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
