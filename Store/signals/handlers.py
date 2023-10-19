@@ -21,9 +21,7 @@ def create_customer_for_new_user(sender, **kwargs):
       message.send([user.email])
     except BadHeaderError:
       pass
-    except:
-      pass
-    # send_mail('Success','User Created Successfully','settings.EMAIL_HOST_USER',,fail_silently=False)
+
 
 @receiver(post_save, sender = Order)
 def send_success_email(sender, **kwargs):
@@ -38,8 +36,7 @@ def send_success_email(sender, **kwargs):
       message.send([user.email])
     except BadHeaderError:
       pass
-    except:
-      pass
+
     
 @receiver(post_save, sender = CustomOrder)
 def send_wait_email(sender, **kwargs):
@@ -54,6 +51,3 @@ def send_wait_email(sender, **kwargs):
       message.send([user.email])
     except BadHeaderError:
       pass
-    except:
-      pass
-    

@@ -36,6 +36,7 @@ class ProductViewSet(ModelViewSet):
 
 class ProductImageViewSet(ModelViewSet):
     serializer_class = ProductImageSerializer
+    permission_classes=[IsAdminOrReadOnly]
 
     def get_serializer_context(self):
         return {'product_id':self.kwargs['product_pk']}
@@ -91,7 +92,7 @@ class CustomerViewSet(ModelViewSet):
 
     @action(detail=False, methods=['GET', 'PUT'], permission_classes=[IsAuthenticated])
     def me(self, request):
-        customer,created = Customer.objects.get(
+        customer= Customer.objects.get(
             user_id=request.user.id)
         if request.method == 'GET':
             serializer = CustomerSerializer(customer)
