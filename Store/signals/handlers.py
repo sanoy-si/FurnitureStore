@@ -8,10 +8,8 @@ from templated_mail.mail import BaseEmailMessage
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_customer_for_new_user(sender, **kwargs):
-  # print(kwargs)
   if kwargs['created']:
     user=kwargs['instance']
-    # print(user.first_name,user.email)
     Customer.objects.create(user=user)
     try:
       message = BaseEmailMessage(
@@ -21,6 +19,8 @@ def create_customer_for_new_user(sender, **kwargs):
       message.send([user.email])
     except BadHeaderError:
       pass
+    except:
+      return "can not send the welcome email"
 
 
 @receiver(post_save, sender = Order)
@@ -36,6 +36,8 @@ def send_success_email(sender, **kwargs):
       message.send([user.email])
     except BadHeaderError:
       pass
+    except:
+      return "can not send the success email"
 
     
 @receiver(post_save, sender = CustomOrder)

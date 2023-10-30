@@ -76,7 +76,16 @@ class AddCartItemSerializer(serializers.ModelSerializer):
         if not Product.objects.filter(pk=value).exists():
             raise serializers.ValidationError(
                 'No product with the given ID was found.')
+        
         return value
+    
+    def validate_quantity(self,quantity):
+        if Product.objects.filter(pk = self.initial_data['product_id']).exists():
+            product = Product.objects.get(pk = self.initial_data['product_id'])
+            if quantity > product.inventory:
+                raise serializers.ValidationError(f'quantity should be less or equal to {product.inventory}')
+            
+        return quantity
 
     def save(self, **kwargs):
         cart_id = self.context['cart_id']
@@ -158,14 +167,32 @@ class CreateOrderSerializer(serializers.Serializer):
             cart_items = CartItem.objects \
                 .select_related('product') \
                 .filter(cart_id=cart_id)
-            order_items = [
-                OrderItem(
-                    order=order,
-                    product=item.product,
-                    unit_price=item.product.unit_price,
-                    quantity=item.quantity
-                ) for item in cart_items
-            ]
+            
+            order_items = []
+            for item in cart_items:
+                if Product.objects.filter(pk = item.product.id).exists():
+                    product = Product.objects.get(pk = item.product.id)
+                    quantity=min(product.inventory,item.quantity)
+                else:
+                    continue
+
+                if quantity == 0:
+                    continue
+                order = order 
+                unit_price = item.product.unit_price
+                
+                order_items.append(OrderItem(
+                        order=order,
+                        product=product,
+                        unit_price=unit_price,
+                        quantity=quantity
+                    ))
+                
+                product.inventory -= quantity
+                product.save() 
+
+            if not order_items:
+                raise serializers.ValidationError('Empty Cart')
             OrderItem.objects.bulk_create(order_items)
 
             Cart.objects.filter(pk=cart_id).delete()
