@@ -59,7 +59,6 @@ class CollectionViewSet(ModelViewSet):
 
 class CartViewSet(CreateModelMixin,RetrieveModelMixin,DestroyModelMixin,GenericViewSet):
     
-
     @action(methods=['GET'],detail=True)
     def refresh(self,request,pk):
         deleted_items = [

@@ -41,9 +41,15 @@ class ProductImage(models.Model):
     image = models.ImageField(upload_to='store/images')
 
 class Customer(models.Model):
+    MALE = 'M'
+    FEMALE = 'F'
+    GENDER_CHOICES = [
+        (MALE,'Male'),
+        (FEMALE,'Female')
+    ]
 
-    phone = models.CharField(max_length=255)
     birth_date = models.DateField(null=True, blank=True)
+    gender = models.CharField(max_length=1,choices=GENDER_CHOICES,null=True,blank=True)
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
