@@ -47,13 +47,22 @@ class SimpleProductSerializer(serializers.ModelSerializer):
 class CartItemSerializer(serializers.ModelSerializer):
     product = SimpleProductSerializer()
     total_price = serializers.SerializerMethodField()
+    initial_quantity = serializers.SerializerMethodField()
+    out_of_stock = serializers.SerializerMethodField()
+
+    
+    def get_initial_quantity(self,cart_item:CartItem):
+        return self.context['initial_quantity']
+    
+    def get_out_of_stock(self,cart_item:CartItem):
+        return self.context['out_of_stock']
 
     def get_total_price(self, cart_item: CartItem):
         return cart_item.quantity * cart_item.product.unit_price
 
     class Meta:
         model = CartItem
-        fields = ['id', 'product', 'quantity', 'total_price']
+        fields = ['id', 'product', 'quantity', 'total_price', 'initial_quantity', 'out_of_stock']
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -110,6 +119,9 @@ class AddCartItemSerializer(serializers.ModelSerializer):
 
 
 class UpdateCartItemSerializer(serializers.ModelSerializer):
+    def validate_quantity(self,quantity):
+        if quantity > self.instance.product.inventory:
+            raise serializers.ValidationError(f"quantity should be less or equal to {self.instance.product.inventory}")
     class Meta:
         model = CartItem
         fields = ['quantity']

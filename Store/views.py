@@ -63,8 +63,25 @@ class CartViewSet(CreateModelMixin,RetrieveModelMixin,DestroyModelMixin,GenericV
 
 class CartItemViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
+    initial_quantity = None
+    out_of_stock = False
+
+    def refresh(self):
+        cart_items = CartItem.objects.filter(cart_id = self.kwargs['cart_pk'])
+        for cart_item in cart_items:
+            if not Product.objects.filter(pk = cart_item.product.id).exists():
+                self.out_of_stock = True
+            else:
+                product = Product.objects.get(pk = cart_item.product.id)
+                if product.inventory < cart_item.quantity:
+                    self.initial_quantity = cart_item.quantity
+                    cart_item.quantity = product.inventory
+                    cart_item.save()
+            if cart_item.quantity == 0:
+                self.out_of_stock = True
 
     def get_serializer_class(self):
+        self.refresh()
         if self.request.method == 'POST':
             return AddCartItemSerializer
         elif self.request.method == 'PATCH':
@@ -72,7 +89,7 @@ class CartItemViewSet(ModelViewSet):
         return CartItemSerializer
 
     def get_serializer_context(self):
-        return {'cart_id': self.kwargs['cart_pk']}
+        return {'cart_id': self.kwargs['cart_pk'],'initial_quantity':self.initial_quantity,'out_of_stock':self.out_of_stock}
 
     def get_queryset(self):
         return CartItem.objects \
