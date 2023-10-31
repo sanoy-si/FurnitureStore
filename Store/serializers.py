@@ -80,7 +80,6 @@ class RefreshCartSerializer(serializers.ModelSerializer):
         return self.context['quantity_changed_items']
     
     def get_deleted_items(self,cart):
-        print(self.context)
         return self.context['deleted_items']
 
 
