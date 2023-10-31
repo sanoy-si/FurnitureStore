@@ -47,22 +47,14 @@ class SimpleProductSerializer(serializers.ModelSerializer):
 class CartItemSerializer(serializers.ModelSerializer):
     product = SimpleProductSerializer()
     total_price = serializers.SerializerMethodField()
-    initial_quantity = serializers.SerializerMethodField()
-    out_of_stock = serializers.SerializerMethodField()
 
-    
-    def get_initial_quantity(self,cart_item:CartItem):
-        return self.context['initial_quantity']
-    
-    def get_out_of_stock(self,cart_item:CartItem):
-        return self.context['out_of_stock']
 
     def get_total_price(self, cart_item: CartItem):
         return cart_item.quantity * cart_item.product.unit_price
 
     class Meta:
         model = CartItem
-        fields = ['id', 'product', 'quantity', 'total_price', 'initial_quantity', 'out_of_stock']
+        fields = ['id', 'product', 'quantity', 'total_price']
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -77,7 +69,25 @@ class CartSerializer(serializers.ModelSerializer):
         model = Cart
         fields = ['id', 'items', 'total_price']
 
+class RefreshCartSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(read_only=True)
+    items = CartItemSerializer(many=True, read_only=True)
+    deleted_items = serializers.SerializerMethodField()
+    quantity_changed_items = serializers.SerializerMethodField()
+    
 
+    def get_quantity_changed_items(self,cart):
+        return self.context['quantity_changed_items']
+    
+    def get_deleted_items(self,cart):
+        print(self.context)
+        return self.context['deleted_items']
+
+
+    class Meta:
+        model = Cart
+        fields = ['id', 'items', 'deleted_items','quantity_changed_items']
+    
 class AddCartItemSerializer(serializers.ModelSerializer):
     product_id = serializers.IntegerField()
 

@@ -1,5 +1,6 @@
 from Store.permissions import FullDjangoModelPermissions, IsAdminOrReadOnly, ViewCustomerHistoryPermission
 from Store.pagination import DefaultPagination
+from django.db.models import F
 from django.db.models.aggregates import Count
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -12,7 +13,7 @@ from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework import status
 from .filters import ProductFilter
 from .models import Cart, CartItem, Collection, CustomOrder, Customer, Order, OrderItem, Product, ProductImage, WishList, WishListItem
-from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CollectionSerializer, CreateOrderSerializer, CreateWishListItemSerializer, CustomerSerializer, CustomOrderSerializer, GetCustomOrdreSerializer, OrderSerializer, ProductImageSerializer, ProductSerializer, UpdateCartItemSerializer, UpdateOrderSerializer, WishListItemSerializer,WishListSerializer
+from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CollectionSerializer, CreateOrderSerializer, CreateWishListItemSerializer, CustomerSerializer, CustomOrderSerializer, GetCustomOrdreSerializer, OrderSerializer, ProductImageSerializer, ProductSerializer, RefreshCartSerializer, SimpleProductSerializer, UpdateCartItemSerializer, UpdateOrderSerializer, WishListItemSerializer,WishListSerializer
 
 
 class ProductViewSet(ModelViewSet):
@@ -57,31 +58,53 @@ class CollectionViewSet(ModelViewSet):
 
 
 class CartViewSet(CreateModelMixin,RetrieveModelMixin,DestroyModelMixin,GenericViewSet):
+    
+
+    @action(methods=['GET'],detail=True)
+    def refresh(self,request,pk):
+        deleted_items = [
+            {
+            'product':{
+                'id':cart_item.product.id,
+                'title':cart_item.product.title
+            },
+            'quantity':cart_item.quantity
+        }
+            for cart_item in CartItem.objects.filter(cart_id = pk,product__inventory = 0)
+        ]
+        quantity_changed_items = [
+            {
+            'product':{
+                'id':cart_item.product.id,
+                'title':cart_item.product.title
+            },
+            'quantity':cart_item.quantity
+        }
+            for cart_item in CartItem.objects.filter(cart_id = pk,product__inventory__lt = F('quantity'),product__inventory__gt = 0)
+        ]
+
+        
+        for cart_item in CartItem.objects.filter(cart_id = pk,product__inventory__lt = F('quantity'),product__inventory__gt = 0):
+            cart_item.quantity = cart_item.product.inventory
+            cart_item.save()
+
+        for cart_item in CartItem.objects.filter(cart_id = pk,product__inventory = 0):
+                cart_item.delete()
+
+        cart = Cart.objects.get(pk = pk)
+        serializer = RefreshCartSerializer(cart,context ={'deleted_items':deleted_items,'quantity_changed_items':quantity_changed_items})
+        
+        return Response(serializer.data)
+
+
     queryset = Cart.objects.prefetch_related('items__product').all()
     serializer_class = CartSerializer
 
 
 class CartItemViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
-    initial_quantity = None
-    out_of_stock = False
-
-    def refresh(self):
-        cart_items = CartItem.objects.filter(cart_id = self.kwargs['cart_pk'])
-        for cart_item in cart_items:
-            if not Product.objects.filter(pk = cart_item.product.id).exists():
-                self.out_of_stock = True
-            else:
-                product = Product.objects.get(pk = cart_item.product.id)
-                if product.inventory < cart_item.quantity:
-                    self.initial_quantity = cart_item.quantity
-                    cart_item.quantity = product.inventory
-                    cart_item.save()
-            if cart_item.quantity == 0:
-                self.out_of_stock = True
 
     def get_serializer_class(self):
-        self.refresh()
         if self.request.method == 'POST':
             return AddCartItemSerializer
         elif self.request.method == 'PATCH':
@@ -89,7 +112,7 @@ class CartItemViewSet(ModelViewSet):
         return CartItemSerializer
 
     def get_serializer_context(self):
-        return {'cart_id': self.kwargs['cart_pk'],'initial_quantity':self.initial_quantity,'out_of_stock':self.out_of_stock}
+        return {'cart_id': self.kwargs['cart_pk']}
 
     def get_queryset(self):
         return CartItem.objects \
@@ -103,9 +126,6 @@ class CustomerViewSet(ModelViewSet):
     permission_classes = [IsAdminUser]
 
 
-    @action(detail=True, permission_classes=[ViewCustomerHistoryPermission])
-    def history(self, request, pk):
-        return Response('ok')
 
     @action(detail=False, methods=['GET', 'PUT'], permission_classes=[IsAuthenticated])
     def me(self, request):
