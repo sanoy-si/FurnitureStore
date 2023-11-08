@@ -115,10 +115,10 @@ class CartItem(models.Model):
 class CustomOrder(models.Model):
     customer = models.ForeignKey(Customer,on_delete=models.CASCADE)
     product_name = models.CharField(max_length=255)
-    left_side_image = models.ImageField()
-    right_side_image = models.ImageField()
+    left_side_image = models.ImageField(null=True, blank= True)
+    right_side_image = models.ImageField(null=True, blank= True)
     front_image = models.ImageField()
-    rear_image = models.ImageField()
+    rear_image = models.ImageField(null=True, blank= True)
     placed_at = models.DateTimeField(auto_now_add=True)
     description = models.TextField(null=True, blank=True)
 
