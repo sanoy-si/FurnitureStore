@@ -21,7 +21,7 @@ class Product(models.Model):
     slug = models.SlugField()
     description = models.TextField(null=True, blank=True)
     unit_price = models.DecimalField(
-        max_digits=6,
+        max_digits=9,
         decimal_places=2,
         validators=[MinValueValidator(1)])
     inventory = models.IntegerField(validators=[MinValueValidator(0)])
