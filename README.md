@@ -20,34 +20,43 @@ The Furniture Store API is a RESTful API designed to provide a comprehensive sol
 - **User Authentication**: Secure user registration and login, with JSON Web Tokens (JWT) for session management.
 
 ### Installation
-
-1. Clone the repository:
-
+1. **Clone the repository**:
     ```bash
-    git clone https://github.com/sanoy-si/.git
+    git clone https://github.com/sanoy-si/FurnitureStore.git
     cd FurnitureStore
     ```
 
-2. Install the required Python packages:
+2. **Create a virtual environment**:
+    ```bash
+    python -m venv venv
+    ```
 
+3. **Activate the virtual environment**:
+   - On macOS/Linux:
+     ```bash
+     source venv/bin/activate
+     ```
+   - On Windows:
+     ```bash
+     venv\Scripts\activate
+     ```
+
+4. **Install the required Python packages**:
     ```bash
     pip install -r requirements.txt
     ```
 
-3. Apply the database migrations:
-
+5. **Apply the database migrations**:
     ```bash
     python manage.py migrate
     ```
 
-4. Create a superuser to access the admin panel:
-
+6. **Create a superuser to access the admin panel**:
     ```bash
     python manage.py createsuperuser
     ```
 
-5. Collect static files:
-
+7. **Collect static files**:
     ```bash
     python manage.py collectstatic
     ```
