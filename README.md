@@ -1,7 +1,7 @@
 # Furniture Store API
 
 ## Overview
-The Furniture Store API is a RESTful API designed to provide a comprehensive solution for managing a furniture e-commerce platform. It enables developers to efficiently manage product listings, handle orders, and improve customer interactions.
+The Furniture Store API is a RESTful API designed to provide a comprehensive solution for managing a furniture e-commerce platform. It enables store owneres to efficiently manage product listings, handle orders, and improve customer interactions.
 
 ## Technologies Used
 - **Django**
